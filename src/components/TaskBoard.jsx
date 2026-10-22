@@ -2,7 +2,7 @@
 import { TASK_STATUS_LIST } from "../utils/commonutils";
 import TaskCard from "./TaskCard";
 
-export default function TaskBoard({ tasks = [] }) {
+export default function TaskBoard({ tasks = [], onEdit, onDelete }) {
   return (
     <section className="task-board" aria-label="Task board">
       {TASK_STATUS_LIST.map((status) => {
@@ -21,7 +21,7 @@ export default function TaskBoard({ tasks = [] }) {
 
             <div className="task-column__content">
               {statusTasks.map((task) => (
-                <TaskCard key={task.id} task={task} />
+                <TaskCard key={task.id} task={task} onEdit={onEdit} onDelete={onDelete} />
               ))}
 
               {statusTasks.length === 0 && (

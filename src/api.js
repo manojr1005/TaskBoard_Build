@@ -54,3 +54,35 @@ export function mapTasksToUsers(todos, users) {
     };
   });
 }
+
+
+
+export async function createTask(task) {
+  return request("/todos/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      todo: task.title,
+      completed: task.status === "Done",
+      userId: task.userId,
+    }),
+  });
+}
+
+export async function updateTask(id, task) {
+  return request(`/todos/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      todo: task.title,
+      completed: task.status === "Done",
+      userId: task.userId,
+    }),
+  });
+}
+
+export async function deleteTask(id) {
+  return request(`/todos/${id}`, {
+    method: "DELETE",
+  });
+}
