@@ -384,8 +384,68 @@
 
 /* Blue border and ring on the focused/selected search box and dropdowns. */
 .app input:focus,
-.app select:focus {
+.app select:focus 
+.app textarea:focus {
   outline: none;
   border-color: var(--accent, #2563eb);
   box-shadow: 0 0 0 3px rgb(37 99 235 / 0.2);
+}
+
+/* Task form */
+.task-form {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.task-form h2 {
+  margin: 0 0 16px;
+}
+
+.task-form__fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.task-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.task-form__field--wide {
+  grid-column: 1 / -1; /* description takes the full row */
+}
+
+.task-form__field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.task-form__field input,
+.task-form__field select,
+.task-form__field textarea {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-heading);
+  font-size: 14px;
+}
+
+.task-form__field textarea {
+  height: 80px;
+  padding: 8px 12px;
+  resize: vertical;
+}
+
+.task-form__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
 }

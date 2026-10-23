@@ -55,72 +55,86 @@ export default function TaskForm({ users, onSubmit, onCancel, initialTask }) {
     <form className="task-form" onSubmit={handleSubmit}>
       <h2>{initialTask ? "Edit task" : "Create task"}</h2>
 
-      <label htmlFor="task-title">Title</label>
-      <input
-        id="task-title"
-        name="title"
-        value={form.title}
-        onChange={handleChange}
-        minLength={5}
-        maxLength={120}
-        required
-      />
+           <div className="task-form__fields">
+        <div className="task-form__field">
+          <label htmlFor="task-title">Title</label>
+          <input
+            id="task-title"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            minLength={5}
+            maxLength={120}
+            required
+          />
+        </div>
 
-      <label htmlFor="task-description">Description</label>
-      <textarea
-        id="task-description"
-        name="description"
-        value={form.description}
-        onChange={handleChange}
-      />
+        <div className="task-form__field task-form__field--wide">
+          <label htmlFor="task-description">Description</label>
+          <textarea
+            id="task-description"
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+          />
+        </div>
 
-      <label htmlFor="task-status">Status</label>
-      <select
-        id="task-status"
-        name="status"
-        value={form.status}
-        onChange={handleChange}
-      >
-        {TASK_STATUS_LIST.map((status) => (
-          <option key={status} value={status}>{status}</option>
-        ))}
-      </select>
+        <div className="task-form__field">
+          <label htmlFor="task-status">Status</label>
+          <select
+            id="task-status"
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+          >
+            {TASK_STATUS_LIST.map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </div>
 
-      <label htmlFor="task-priority">Priority</label>
-      <select
-        id="task-priority"
-        name="priority"
-        value={form.priority}
-        onChange={handleChange}
-      >
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-      </select>
+        <div className="task-form__field">
+          <label htmlFor="task-priority">Priority</label>
+          <select
+            id="task-priority"
+            name="priority"
+            value={form.priority}
+            onChange={handleChange}
+          >
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
 
-      <label htmlFor="task-due-date">Due date</label>
-      <input
-        id="task-due-date"
-        type="date"
-        name="dueDate"
-        value={form.dueDate}
-        onChange={handleChange}
-      />
+        <div className="task-form__field">
+          <label htmlFor="task-due-date">Due date</label>
+          <input
+            id="task-due-date"
+            type="date"
+            name="dueDate"
+            value={form.dueDate}
+            onChange={handleChange}
+          />
+        </div>
 
-      <label htmlFor="task-assignee">Assignee</label>
-      <select
-        id="task-assignee"
-        name="userId"
-        value={form.userId}
-        onChange={handleChange}
-      >
-        <option value="">Unassigned</option>
-        {users.map((user) => (
-          <option key={user.id} value={user.id}>
-            {user.firstName} {user.lastName}
-          </option>
-        ))}
-      </select>
+        <div className="task-form__field">
+          <label htmlFor="task-assignee">Assignee</label>
+          <select
+            id="task-assignee"
+            name="userId"
+            value={form.userId}
+            onChange={handleChange}
+          >
+            <option value="">Unassigned</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.firstName} {user.lastName}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {error && <p role="alert">{error}</p>}
 
