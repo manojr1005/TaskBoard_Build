@@ -196,58 +196,196 @@
 
 
 
-/* Keep the search input aligned and easy to use. */
-.task-search {
-  display: grid;
-  gap: 8px;
-  max-width: 420px;
-  margin-bottom: 16px;
-}
-
-.task-search input {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+/* Toolbar: one wrapping row, controls aligned on the same baseline. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 16px;
   background: var(--surface);
-  color: var(--text-heading);
-  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 12px;
 }
 
-
-
-/* Keep filter controls consistent and easy to use. */
+.task-search,
 .task-filter {
   display: grid;
-  gap: 8px;
-  max-width: 420px;
-  margin-bottom: 16px;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
-.task-filter select {
+.task-search {
+  flex: 1 1 240px;
+}
+
+.task-filter {
+  flex: 0 1 180px;
+}
+
+.task-search input,
+.task-filter select,
+.task-card select {
   width: 100%;
-  padding: 10px 12px;
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   color: var(--text-heading);
   font: inherit;
+  font-size: 14px;
+  font-weight: 400;
 }
 
+.task-card select {
+  width: auto;
+  height: 32px;
+  margin-left: 8px;
+}
 
-/* Keep the Chaos Mode toggle aligned and easy to read. */
+/* Buttons */
+.app button {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-heading);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.app button:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+.app button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.task-card button,
+.task-table td button,
+.toast button,
+.undo-notice button {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.toolbar > button:first-of-type {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.toolbar > button:first-of-type:hover {
+  background: var(--accent-hover);
+}
+
+.view-toggle {
+  display: inline-flex;
+}
+
+.view-toggle button:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.view-toggle button:last-child {
+  margin-left: -1px;
+  border-radius: 0 8px 8px 0;
+}
+
+.view-toggle button[aria-pressed="true"] {
+  background: var(--text-heading);
+  border-color: var(--text-heading);
+  color: var(--surface);
+}
+
+/* Chaos Mode: the checkbox stays for keyboard and screen readers, drawn as a switch. */
 .chaos-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin: 12px 0;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  gap: 10px;
+  height: 40px;
   font-size: 14px;
   cursor: pointer;
 }
 
 .chaos-toggle input {
-  cursor: pointer;
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+
+.switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #d1d5db;
+  transition: background 0.15s;
+}
+
+.switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.2);
+  transition: transform 0.15s;
+}
+
+.chaos-toggle input:checked + .switch {
+  background: var(--warning);
+}
+
+.chaos-toggle input:checked + .switch::after {
+  transform: translateX(18px);
+}
+
+.chaos-toggle input:focus-visible + .switch {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 24px;
+  color: var(--text-muted);
+}
+
+
+/* Status colour on top of each Kanban column (order: To Do, In Progress, Done). */
+.task-board > .task-column {
+  border-top: 3px solid #6f7890;
+}
+
+.task-board > .task-column:nth-child(2) {
+  border-top-color: #d97706;
+}
+
+.task-board > .task-column:nth-child(3) {
+  border-top-color: #16a34a;
+}
+
+/* Blue border and ring on the focused/selected search box and dropdowns. */
+.app input:focus,
+.app select:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 3px rgb(37 99 235 / 0.2);
 }

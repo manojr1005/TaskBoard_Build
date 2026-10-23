@@ -369,6 +369,8 @@ function handleEditClick(task) {
 
       <main className="app-main">
 
+{/* Toolbar: search, filters, actions, view and chaos toggles in one row. */}
+<div className="toolbar">
 {/* Capture the text the user wants to search for. */}
 <div className="task-search">
   <label htmlFor="task-search-input">Search tasks</label>
@@ -468,11 +470,14 @@ function handleEditClick(task) {
 <label className="chaos-toggle">
   <input
     type="checkbox"
+    role="switch"
     checked={chaosMode}
     onChange={(event) => setChaosMode(event.target.checked)}
   />
+  <span className="switch" aria-hidden="true" />
   Chaos Mode (slow requests + 20% write failures)
 </label>
+</div>
 
 {showForm && (
   <TaskForm

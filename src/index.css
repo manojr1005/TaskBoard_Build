@@ -1,4 +1,3 @@
-
 :root {
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -10,6 +9,9 @@
   --border: #e5e7eb;
   --text-heading: #111827;
   --text-muted: #6b7280;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --warning: #d97706;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
