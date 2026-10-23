@@ -5,6 +5,8 @@ import { fetchTasks, fetchUsers, mapTasksToUsers, createTask, updateTask, delete
 import { PAGINATION_CONFIG } from "./utils/commonutils";
 import "./App.css";
 import TaskForm from "./components/TaskForm";
+import TaskTable from "./components/TaskTable";
+import { DndContext } from "@dnd-kit/core";
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
@@ -19,6 +21,32 @@ export default function App() {
   const [deletedTask, setDeletedTask] = useState(null);
   // Stores a temporary success or error notification.
   const [toast, setToast] = useState("");
+
+  const [viewMode, setViewMode] = useState("kanban");
+  
+const [searchTerm, setSearchTerm] = useState(
+  () => new URLSearchParams(window.location.search).get("search") || ""
+);
+
+const [debouncedSearch, setDebouncedSearch] = useState(
+  () => new URLSearchParams(window.location.search)
+    .get("search")
+    ?.trim()
+    .toLowerCase() || ""
+);
+
+const [statusFilter, setStatusFilter] = useState(
+  () => new URLSearchParams(window.location.search).get("status") || "All"
+);
+
+const [priorityFilter, setPriorityFilter] = useState(
+  () => new URLSearchParams(window.location.search).get("priority") || "All"
+);
+
+const [assigneeFilter, setAssigneeFilter] = useState(
+  () => new URLSearchParams(window.location.search).get("assignee") || "All"
+);
+
 
   useEffect(() => {
     let cancelled = false;
@@ -59,6 +87,35 @@ export default function App() {
     };
   }, [currentPage, retryCount]);
 
+
+   // Apply the search term after the user pauses typing for 300 ms.
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim().toLowerCase());
+    }, 300);
+
+    return () => clearTimeout(timerId);
+  }, [searchTerm]);
+
+
+  // Update the URL whenever the search or filters change.
+useEffect(() => {
+  const params = new URLSearchParams();
+
+  if (searchTerm) params.set("search", searchTerm);
+  if (statusFilter !== "All") params.set("status", statusFilter);
+  if (priorityFilter !== "All") params.set("priority", priorityFilter);
+  if (assigneeFilter !== "All") params.set("assignee", assigneeFilter);
+
+  const query = params.toString();
+
+  window.history.replaceState(
+    null,
+    "",
+    query ? `?${query}` : window.location.pathname
+  );
+}, [searchTerm, statusFilter, priorityFilter, assigneeFilter]);
+
   // Create a task and add it to the board.
 async function handleCreateTask(taskData) {
   const newTask = {
@@ -88,6 +145,38 @@ async function handleCreateTask(taskData) {
 
   setShowForm(false);
 }
+
+
+ // Update the task status immediately when it is dropped into another column.
+async function handleDragEnd({ active, over }) {
+  if (!over) return;
+
+  const task = tasks.find((item) => String(item.id) === String(active.id));
+  const newStatus = String(over.id);
+
+  if (!task || task.status === newStatus) return;
+
+  const updatedTask = { ...task, status: newStatus };
+
+  setTasks((currentTasks) =>
+    currentTasks.map((item) =>
+      String(item.id) === String(active.id) ? updatedTask : item
+    )
+  );
+
+  try {
+    await updateTask(task.id, updatedTask);
+  } catch (err) {
+    setTasks((currentTasks) =>
+      currentTasks.map((item) =>
+        String(item.id) === String(active.id) ? task : item
+      )
+    );
+    setToast("Unable to update task status. Changes were rolled back.");
+  }
+}
+
+
 
 // Update a task immediately and restore its old values if the API fails.
 async function handleUpdateTask(taskData) {
@@ -128,21 +217,21 @@ async function handleUpdateTask(taskData) {
 
 
 
-// Delete the task and allow undo for five seconds.
+// Delete the task and show temporary notifications for five seconds.
 async function handleDeleteTask(task) {
   setTasks((currentTasks) =>
     currentTasks.filter((item) => item.id !== task.id)
   );
   setDeletedTask(task);
+  setToast("");
 
   try {
     await deleteTask(task.id);
-    setToast("Task deleted. You can undo within 5 seconds.");
   } catch (err) {
     setTasks((currentTasks) => [task, ...currentTasks]);
     setDeletedTask(null);
-    console.error("Unable to delete task:", err);
     setToast("Failed to delete task. The task was restored.");
+    console.error("Unable to delete task:", err);
     return;
   }
 
@@ -150,6 +239,7 @@ async function handleDeleteTask(task) {
     setDeletedTask((current) =>
       current?.id === task.id ? null : current
     );
+    setToast("");
   }, 5000);
 }
 
@@ -181,14 +271,137 @@ function handleEditClick(task) {
     totalTasks / PAGINATION_CONFIG.PAGE_SIZE
   );
 
+
+
+ 
+  // Apply search, status, priority, and assignee filters together.
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch = task.title
+      .toLowerCase()
+      .includes(debouncedSearch);
+
+    const matchesStatus =
+      statusFilter === "All" || task.status === statusFilter;
+
+    const matchesPriority =
+      priorityFilter === "All" || task.priority === priorityFilter;
+
+    const matchesAssignee =
+      assigneeFilter === "All" ||
+      (assigneeFilter === "Unassigned"
+        ? !task.userId
+        : task.assignee === assigneeFilter);
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesPriority &&
+      matchesAssignee
+    );
+  });
+
+ 
+
+
+
   return (
     <div className="app">
       <AppHeader />
 
       <main className="app-main">
+
+{/* Capture the text the user wants to search for. */}
+<div className="task-search">
+  <label htmlFor="task-search-input">Search tasks</label>
+  <input
+    id="task-search-input"
+    type="search"
+    placeholder="Search by task title..."
+    value={searchTerm}
+    onChange={(event) => setSearchTerm(event.target.value)}
+  />
+</div>
+
+
+
+{/* Let users filter tasks by their current status. */}
+<div className="task-filter">
+  <label htmlFor="status-filter">Filter by status</label>
+  <select
+    id="status-filter"
+    value={statusFilter}
+    onChange={(event) => setStatusFilter(event.target.value)}
+  >
+    <option value="All">All statuses</option>
+    <option value="To Do">To Do</option>
+    <option value="In Progress">In Progress</option>
+    <option value="Done">Done</option>
+  </select>
+</div>
+
+
+{/* Let users filter tasks by priority. */}
+<div className="task-filter">
+  <label htmlFor="priority-filter">Filter by priority</label>
+  <select
+    id="priority-filter"
+    value={priorityFilter}
+    onChange={(event) => setPriorityFilter(event.target.value)}
+  >
+    <option value="All">All priorities</option>
+    <option value="Low">Low</option>
+    <option value="Medium">Medium</option>
+    <option value="High">High</option>
+  </select>
+</div>
+
+
+{/* Let users filter tasks by their assigned person. */}
+<div className="task-filter">
+  <label htmlFor="assignee-filter">Filter by assignee</label>
+  <select
+    id="assignee-filter"
+    value={assigneeFilter}
+    onChange={(event) => setAssigneeFilter(event.target.value)}
+  >
+    <option value="All">All assignees</option>
+    <option value="Unassigned">Unassigned</option>
+    {users.map((user) => (
+      <option key={user.id} value={`${user.firstName} ${user.lastName}`}>
+        {user.firstName} {user.lastName}
+      </option>
+    ))}
+  </select>
+</div>
+
+
+
+
+
+
+
+
         <button onClick={() => setShowForm(true)}>
   Add Task
 </button>
+
+<div className="view-toggle">
+  <button
+    type="button"
+    onClick={() => setViewMode("kanban")}
+    aria-pressed={viewMode === "kanban"}
+  >
+    Kanban View
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setViewMode("table")}
+    aria-pressed={viewMode === "table"}
+  >
+    Table View
+  </button>
+</div>
 
 {showForm && (
   <TaskForm
@@ -240,7 +453,26 @@ function handleEditClick(task) {
 
         {!loading && !error && tasks.length > 0 && (
           <>
-            <TaskBoard tasks={tasks} onEdit={handleEditClick} onDelete={handleDeleteTask} />
+            
+
+{/* Connect drag events to the Kanban board. */}
+{viewMode === "kanban" ? (
+  <DndContext onDragEnd={handleDragEnd}>
+    <TaskBoard
+       tasks={filteredTasks}
+      onEdit={handleEditClick}
+      onDelete={handleDeleteTask}
+    />
+  </DndContext>
+) : (
+  <TaskTable
+     tasks={filteredTasks}
+    onEdit={handleEditClick}
+    onDelete={handleDeleteTask}
+  />
+)}
+
+
 
             <nav className="pagination" aria-label="Task pages">
               <button

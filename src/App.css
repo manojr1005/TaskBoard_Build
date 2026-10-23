@@ -148,3 +148,88 @@
 .toast button {
   cursor: pointer;
 }
+
+
+
+/* Keep the task table readable and allow horizontal scrolling on small screens. */
+.task-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.task-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.task-table th,
+.task-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-table th {
+  background: var(--surface-muted);
+  font-weight: 600;
+}
+
+.task-table td button {
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+
+/* Highlight the destination column and the card being dragged. */
+.task-column--over {
+  border-color: var(--text-heading);
+  background: var(--surface-muted);
+}
+
+.task-card--dragging {
+  opacity: 0.5;
+  z-index: 1;
+}
+
+
+
+/* Keep the search input aligned and easy to use. */
+.task-search {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 16px;
+}
+
+.task-search input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-heading);
+  font: inherit;
+}
+
+
+
+/* Keep filter controls consistent and easy to use. */
+.task-filter {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 16px;
+}
+
+.task-filter select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-heading);
+  font: inherit;
+}

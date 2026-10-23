@@ -1,8 +1,33 @@
 
+import { useDraggable } from "@dnd-kit/core";
+
 export default function TaskCard({ task, onEdit, onDelete }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: String(task.id),
+    });
+
+  const cardStyle = transform
+    ? {
+        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      }
+    : undefined;
+
   return (
-    <article className="task-card">
-      <h3 className="task-card__title">{task.title}</h3>
+    <article
+      ref={setNodeRef}
+      style={cardStyle}
+      className={`task-card ${isDragging ? "task-card--dragging" : ""}`}
+    >
+      {/* Use the card title as the drag handle and keep action buttons separate. */}
+      <h3
+        className="task-card__title"
+        {...listeners}
+        {...attributes}
+        style={{ cursor: "grab", touchAction: "none" }}
+      >
+        {task.title}
+      </h3>
 
       <p className="task-card__description">
         {task.description || "No description provided"}
@@ -15,12 +40,10 @@ export default function TaskCard({ task, onEdit, onDelete }) {
         </span>
       </div>
 
-      {/* Send the selected task to the appropriate parent handler. */}
       <div className="task-card__actions">
         <button type="button" onClick={() => onEdit(task)}>
           Edit
         </button>
-
         <button type="button" onClick={() => onDelete(task)}>
           Delete
         </button>
