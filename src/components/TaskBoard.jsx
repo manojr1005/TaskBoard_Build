@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { TASK_STATUS_LIST } from "../utils/commonutils";
 import TaskCard from "./TaskCard";
 
-function TaskColumn({ status, tasks, onEdit, onDelete }) {
+function TaskColumn({ status, tasks, onEdit, onDelete, onStatusChange }) {
   const { setNodeRef, isOver } = useDroppable({
     id: status,
   });
@@ -25,6 +25,7 @@ function TaskColumn({ status, tasks, onEdit, onDelete }) {
             task={task}
             onEdit={onEdit}
             onDelete={onDelete}
+            onStatusChange={onStatusChange}
           />
         ))}
 
@@ -36,7 +37,12 @@ function TaskColumn({ status, tasks, onEdit, onDelete }) {
   );
 }
 
-export default function TaskBoard({ tasks = [], onEdit, onDelete }) {
+export default function TaskBoard({
+  tasks = [],
+  onEdit,
+  onDelete,
+  onStatusChange,
+}) {
   return (
     <section className="task-board" aria-label="Task board">
       {/* Register each status column as a separate drop target. */}
@@ -47,6 +53,7 @@ export default function TaskBoard({ tasks = [], onEdit, onDelete }) {
           tasks={tasks.filter((task) => task.status === status)}
           onEdit={onEdit}
           onDelete={onDelete}
+          onStatusChange={onStatusChange}
         />
       ))}
     </section>

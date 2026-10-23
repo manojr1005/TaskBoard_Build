@@ -1,7 +1,13 @@
 
 import { useDraggable } from "@dnd-kit/core";
+import { TASK_STATUS_LIST } from "../utils/commonutils";
 
-export default function TaskCard({ task, onEdit, onDelete }) {
+export default function TaskCard({
+  task,
+  onEdit,
+  onDelete,
+  onStatusChange,
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: String(task.id),
@@ -39,6 +45,22 @@ export default function TaskCard({ task, onEdit, onDelete }) {
           {task.assignee || "Unassigned"}
         </span>
       </div>
+
+      {/* Provide a keyboard-accessible alternative to dragging tasks. */}
+<label>
+  Change status
+  <select
+    aria-label={`Change status for ${task.title}`}
+    value={task.status}
+    onChange={(event) => onStatusChange(task, event.target.value)}
+  >
+    {TASK_STATUS_LIST.map((status) => (
+      <option key={status} value={status}>
+        {status}
+      </option>
+    ))}
+  </select>
+</label>
 
       <div className="task-card__actions">
         <button type="button" onClick={() => onEdit(task)}>

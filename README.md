@@ -1,16 +1,85 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+# Task Board
 
-Currently, two official plugins are available:
+A Trello-style task management application built with React and JavaScript.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Kanban board with To Do, In Progress, and Done columns
+- Drag-and-drop tasks and a table view
+- Create, edit, and delete tasks
+- Task title validation (5–120 characters)
+- Priority, due date, and user assignment
+- Search with debounce and status, priority, and assignee filters
+- Filter state synchronized with URL parameters
+- Server-side pagination using limit and skip
+- Loading, empty, and error states
+- Optimistic updates with rollback and error notifications
+- Undo delete for 5 seconds
+- Chaos Mode for simulated latency and write failures
+- Generate 5,000 client-side tasks for stress testing
+- Keyboard alternative for changing task status
+- Automated tests for form validation, rollback, and filtering
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the Oxlint configuration
+- React and JavaScript — UI and application logic
+- Vite — development server and production builds
+- CSS — styling and responsive layout
+- DummyJSON — task and user API
+- @dnd-kit/core — drag-and-drop interaction
+- Vitest and React Testing Library — automated tests
+- Local component state — UI state management
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Run Locally
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Run tests:
+
+```bash
+npm test
+```
+
+Create a production build:
+
+```bash
+npm run build
+```
+
+## Architecture
+
+- `src/App.jsx` — application state, filtering, pagination, CRUD operations, and view switching
+- `src/api.js` — API requests, user mapping, and Chaos Mode behavior
+- `src/utils/commonutils.js` — shared configuration and task status values
+- `src/components/` — reusable UI components, task form, Kanban board, and table
+- `src/components/TaskForm.test.jsx` — form validation tests
+- `src/App.test.jsx` — optimistic rollback and filter tests
+
+## Data Consistency and Trade-offs
+
+Task changes are shown optimistically so the interface responds immediately. If a write request fails, the application restores the previous state and displays an error notification.
+
+DummyJSON simulates write operations; changes are not permanently saved on its server. Priority and due date are managed by the frontend. Therefore, refreshing the application may reset changes or frontend-only fields.
+
+Chaos Mode adds artificial latency and randomly fails approximately 20% of write requests to help demonstrate error handling.
+
+The stress-test feature generates 5,000 tasks in the browser and is intended for testing UI performance.
+
+## Future Improvements
+
+- Add a persistent backend and database
+- Persist priority and due date
+- Add more automated tests for deletion, pagination, and drag-and-drop
+- Improve performance for very large task lists
+- Add end-to-end testing

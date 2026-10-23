@@ -10,6 +10,8 @@ import { DndContext } from "@dnd-kit/core";
 
 export default function App() {
   const [tasks, setTasks] = useState([]);
+  // Track whether the stress-test tasks have been generated.
+  const [stressTestEnabled, setStressTestEnabled] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalTasks, setTotalTasks] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -23,6 +25,9 @@ export default function App() {
   const [toast, setToast] = useState("");
 
   const [viewMode, setViewMode] = useState("kanban");
+  // Track whether simulated API delays and failures are enabled.
+  const [chaosMode, setChaosMode] = useState(false);
+  
   
 const [searchTerm, setSearchTerm] = useState(
   () => new URLSearchParams(window.location.search).get("search") || ""
@@ -133,7 +138,7 @@ async function handleCreateTask(taskData) {
   setTasks((currentTasks) => [newTask, ...currentTasks]);
 
   try {
-    await createTask(taskData);
+    await createTask(taskData, chaosMode);
     setToast("Task created successfully.");
   } catch (err) {
     setTasks((currentTasks) =>
@@ -145,6 +150,30 @@ async function handleCreateTask(taskData) {
 
   setShowForm(false);
 }
+
+
+// Generate 5,000 sample tasks locally for performance testing.
+function handleStressTest() {
+  const stressTasks = Array.from({ length: 5000 }, (_, index) => ({
+    id: `stress-${index + 1}`,
+    title: `Stress Test Task ${index + 1}`,
+    todo: `Stress Test Task ${index + 1}`,
+    status: "To Do",
+    completed: false,
+    priority: "Medium",
+    dueDate: "",
+    userId: users[0]?.id ?? null,
+    assignee: users[0]
+      ? `${users[0].firstName} ${users[0].lastName}`
+      : "Unassigned",
+    avatar: users[0]?.image || "",
+  }));
+
+  setTasks((currentTasks) => [...currentTasks, ...stressTasks]);
+  setStressTestEnabled(true);
+  setToast("5,000 stress-test tasks added.");
+}
+
 
 
  // Update the task status immediately when it is dropped into another column.
@@ -165,7 +194,7 @@ async function handleDragEnd({ active, over }) {
   );
 
   try {
-    await updateTask(task.id, updatedTask);
+    await updateTask(task.id, updatedTask, chaosMode);
   } catch (err) {
     setTasks((currentTasks) =>
       currentTasks.map((item) =>
@@ -173,6 +202,36 @@ async function handleDragEnd({ active, over }) {
       )
     );
     setToast("Unable to update task status. Changes were rolled back.");
+  }
+}
+
+
+// Update task status when a user selects a status from the dropdown.
+async function handleStatusChange(task, newStatus) {
+  if (task.status === newStatus) return;
+
+  const updatedTask = {
+    ...task,
+    status: newStatus,
+    completed: newStatus === "Done",
+  };
+
+  setTasks((currentTasks) =>
+    currentTasks.map((item) =>
+      item.id === task.id ? updatedTask : item
+    )
+  );
+
+  try {
+    await updateTask(task.id, updatedTask, chaosMode);
+    setToast("Task status updated successfully.");
+  } catch (err) {
+    setTasks((currentTasks) =>
+      currentTasks.map((item) =>
+        item.id === task.id ? task : item
+      )
+    );
+    setToast("Status update failed. Changes were rolled back.");
   }
 }
 
@@ -199,7 +258,7 @@ async function handleUpdateTask(taskData) {
   );
 
   try {
-    await updateTask(oldTask.id, taskData);
+    await updateTask(oldTask.id, taskData, chaosMode);
     setToast("Task updated successfully.");
   } catch (err) {
     setTasks((currentTasks) =>
@@ -226,7 +285,7 @@ async function handleDeleteTask(task) {
   setToast("");
 
   try {
-    await deleteTask(task.id);
+    await deleteTask(task.id, chaosMode);
   } catch (err) {
     setTasks((currentTasks) => [task, ...currentTasks]);
     setDeletedTask(null);
@@ -375,14 +434,16 @@ function handleEditClick(task) {
 </div>
 
 
-
-
-
-
-
-
         <button onClick={() => setShowForm(true)}>
   Add Task
+</button>
+
+<button
+  type="button"
+  onClick={handleStressTest}
+  disabled={stressTestEnabled}
+>
+  {stressTestEnabled ? "Stress Test Active" : "Generate 5,000 Tasks"}
 </button>
 
 <div className="view-toggle">
@@ -402,6 +463,16 @@ function handleEditClick(task) {
     Table View
   </button>
 </div>
+
+{/* Enable simulated API delays and write failures. */}
+<label className="chaos-toggle">
+  <input
+    type="checkbox"
+    checked={chaosMode}
+    onChange={(event) => setChaosMode(event.target.checked)}
+  />
+  Chaos Mode (slow requests + 20% write failures)
+</label>
 
 {showForm && (
   <TaskForm
@@ -462,6 +533,7 @@ function handleEditClick(task) {
        tasks={filteredTasks}
       onEdit={handleEditClick}
       onDelete={handleDeleteTask}
+      onStatusChange={handleStatusChange}
     />
   </DndContext>
 ) : (

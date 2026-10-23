@@ -13,11 +13,15 @@ export const TASK_STATUS = {
 export const TASK_STATUS_LIST = Object.values(TASK_STATUS);
 
 
+
 export const API_CONFIG = {
   BASE_URL: "https://dummyjson.com",
   TODOS_ENDPOINT: "/todos",
   USERS_ENDPOINT: "/users",
+  CHAOS_DELAY_MS: 1500,
+  CHAOS_FAILURE_RATE: 0.2,
 };
+
 
 export const PAGINATION_CONFIG = {
   PAGE_SIZE: 20,

@@ -1,7 +1,24 @@
 
 import { API_CONFIG, PAGINATION_CONFIG } from "./utils/commonutils";
 
-async function request(endpoint, options = {}) {
+async function request(endpoint, options = {}, chaosMode = false) {
+  // Simulate network latency when Chaos Mode is enabled.
+  if (chaosMode) {
+    await new Promise((resolve) =>
+      setTimeout(resolve, API_CONFIG.CHAOS_DELAY_MS)
+    );
+  }
+
+
+    // Simulate random failures for write requests in Chaos Mode.
+  if (
+    chaosMode &&
+    ["POST", "PUT", "DELETE"].includes(options.method) &&
+    Math.random() < API_CONFIG.CHAOS_FAILURE_RATE
+  ) {
+    throw new Error("Chaos Mode: Simulated API failure.");
+  }
+
   const response = await fetch(
     `${API_CONFIG.BASE_URL}${endpoint}`,
     options
@@ -69,20 +86,25 @@ export async function createTask(task) {
   });
 }
 
-export async function updateTask(id, task) {
-  return request(`/todos/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      todo: task.title,
-      completed: task.status === "Done",
-      userId: task.userId,
-    }),
-  });
-}
 
-export async function deleteTask(id) {
-  return request(`/todos/${id}`, {
-    method: "DELETE",
-  });
+  // Pass the Chaos Mode setting into the update request.
+  export async function updateTask(id, task, chaosMode = false) {
+    return request(`/todos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        todo: task.title,
+        completed: task.status === "Done",
+        userId: task.userId,
+      }),
+    }, chaosMode);
+  }
+
+
+
+  // Pass the Chaos Mode setting into the delete request.
+  export async function deleteTask(id, chaosMode = false) {
+    return request(`/todos/${id}`, {
+      method: "DELETE",
+    }, chaosMode);
 }
