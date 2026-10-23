@@ -75,11 +75,3 @@ DummyJSON simulates write operations; changes are not permanently saved on its s
 Chaos Mode adds artificial latency and randomly fails approximately 20% of write requests to help demonstrate error handling.
 
 The stress-test feature generates 5,000 tasks in the browser and is intended for testing UI performance.
-
-## Future Improvements
-
-- Add a persistent backend and database
-- Persist priority and due date
-- Add more automated tests for deletion, pagination, and drag-and-drop
-- Improve performance for very large task lists
-- Add end-to-end testing
