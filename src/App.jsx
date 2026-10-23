@@ -17,6 +17,8 @@ export default function App() {
   const [showForm, setShowForm] = useState(false)
   const [editingTask, setEditingTask] = useState(null);
   const [deletedTask, setDeletedTask] = useState(null);
+  // Stores a temporary success or error notification.
+  const [toast, setToast] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -75,11 +77,13 @@ async function handleCreateTask(taskData) {
 
   try {
     await createTask(taskData);
+    setToast("Task created successfully.");
   } catch (err) {
     setTasks((currentTasks) =>
       currentTasks.filter((task) => task.id !== newTask.id)
     );
     console.error("Unable to create task:", err);
+    setToast("Failed to create task. Changes were rolled back.");
   }
 
   setShowForm(false);
@@ -107,6 +111,7 @@ async function handleUpdateTask(taskData) {
 
   try {
     await updateTask(oldTask.id, taskData);
+    setToast("Task updated successfully.");
   } catch (err) {
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
@@ -114,6 +119,7 @@ async function handleUpdateTask(taskData) {
       )
     );
     console.error("Unable to update task:", err);
+    setToast("Failed to update task. Changes were rolled back.");
   } finally {
     setShowForm(false);
     setEditingTask(null);
@@ -131,10 +137,12 @@ async function handleDeleteTask(task) {
 
   try {
     await deleteTask(task.id);
+    setToast("Task deleted. You can undo within 5 seconds.");
   } catch (err) {
     setTasks((currentTasks) => [task, ...currentTasks]);
     setDeletedTask(null);
     console.error("Unable to delete task:", err);
+    setToast("Failed to delete task. The task was restored.");
     return;
   }
 
@@ -200,6 +208,16 @@ function handleEditClick(task) {
     <span>Task deleted: {deletedTask.title}</span>
     <button type="button" onClick={handleUndoDelete}>
       Undo
+    </button>
+  </div>
+)}
+
+      {/* Display a notification when a task operation finishes. */}
+{toast && (
+  <div className="toast" role="status">
+    {toast}
+    <button type="button" onClick={() => setToast("")}>
+      Close
     </button>
   </div>
 )}
