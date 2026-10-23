@@ -6,7 +6,6 @@ export default function AppHeader() {
     <header className="app-header">
       <div className="app-header__content">
         <h1>{APP_CONFIG.title}</h1>
-        <p>{APP_CONFIG.subtitle}</p>
       </div>
     </header>
   );
